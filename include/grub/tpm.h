@@ -40,5 +40,13 @@ grub_err_t grub_tpm_measure (unsigned char *buf, grub_size_t size,
 grub_err_t grub_tpm2_submit_command (unsigned char *command,
                                      grub_size_t command_size,
                                      unsigned char *response,
-                                     grub_size_t response_size)
+                                     grub_size_t response_size);
+
+grub_err_t grub_tpm2_get_random (unsigned char *buffer, grub_size_t size);
+
+grub_err_t grub_tpm2_start_auth_session (grub_uint32_t *handle);
+
+grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle,
+                                     unsigned char *sensitive,
+                                     grub_size_t sensitive_size);
 #endif
