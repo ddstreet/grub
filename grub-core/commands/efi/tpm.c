@@ -287,3 +287,29 @@ grub_tpm_measure (unsigned char *buf, grub_size_t size, grub_uint8_t pcr,
   else
     return grub_tpm2_log_event (tpm_handle, buf, size, pcr, description);
 }
+
+grub_err_t grub_tpm2_submit_command (unsigned char *command,
+                                     grub_size_t command_size,
+                                     unsigned char *response,
+                                     grub_size_t response_size)
+{
+  grub_efi_handle_t tpm_handle;
+  grub_efi_uint8_t protocol_version;
+  grub_efi_tpm2_protocol_t *tpm;
+  grub_efi_status_t status;
+
+  if (!grub_tpm_handle_find (&tpm_handle, &protocol_version))
+    return 0;
+
+  tpm = grub_efi_open_protocol (tpm_handle, &tpm2_guid,
+				GRUB_EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+
+  if (!grub_tpm2_present (tpm))
+    return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("no TPM2 device"));
+
+  status = efi_call_5 (tpm->submit_command, tpm,
+                       (grub_uint32_t) command_size, (grub_addr_t) command,
+                       (grub_uint32_t) response_size, (grub_addr_t) response);
+
+  return grub_efi_tpm_status (status);
+}

@@ -36,4 +36,9 @@
 
 grub_err_t grub_tpm_measure (unsigned char *buf, grub_size_t size,
 			     grub_uint8_t pcr, const char *description);
+
+grub_err_t grub_tpm2_submit_command (unsigned char *command,
+                                     grub_size_t command_size,
+                                     unsigned char *response,
+                                     grub_size_t response_size)
 #endif
