@@ -132,7 +132,7 @@ grub_tpm_handle_find (grub_efi_handle_t *tpm_handle,
 }
 
 static grub_err_t
-grub_efi_log_event_status (grub_efi_status_t status)
+grub_efi_tpm_status (grub_efi_status_t status)
 {
   switch (status)
     {
@@ -184,7 +184,7 @@ grub_tpm1_log_event (grub_efi_handle_t tpm_handle, unsigned char *buf,
 		       algorithm, event, &eventnum, &lastevent);
   grub_free (event);
 
-  return grub_efi_log_event_status (status);
+  return grub_efi_tpm_status (status);
 }
 
 static grub_err_t
@@ -220,7 +220,7 @@ grub_tpm2_log_event (grub_efi_handle_t tpm_handle, unsigned char *buf,
 		       (grub_uint64_t) size, event);
   grub_free (event);
 
-  return grub_efi_log_event_status (status);
+  return grub_efi_tpm_status (status);
 }
 
 static void
@@ -239,7 +239,7 @@ grub_cc_log_event (unsigned char *buf, grub_size_t size, grub_uint8_t pcr,
   status = efi_call_3 (cc->map_pcr_to_mr_index, cc, pcr, &mr);
   if (status != GRUB_EFI_SUCCESS)
     {
-      grub_efi_log_event_status (status);
+      grub_efi_tpm_status (status);
       return;
     }
 
@@ -264,7 +264,7 @@ grub_cc_log_event (unsigned char *buf, grub_size_t size, grub_uint8_t pcr,
   grub_free (event);
 
   if (status != GRUB_EFI_SUCCESS)
-    grub_efi_log_event_status (status);
+    grub_efi_tpm_status (status);
 }
 
 grub_err_t
