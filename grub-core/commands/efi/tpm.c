@@ -104,18 +104,6 @@ grub_tpm_handle_find (grub_efi_handle_t *tpm_handle,
       return 1;
     }
 
-  handles = grub_efi_locate_handle (GRUB_EFI_BY_PROTOCOL, &tpm_guid, NULL,
-				    &num_handles);
-  if (handles && num_handles > 0)
-    {
-      grub_tpm_handle = handles[0];
-      *tpm_handle = handles[0];
-      grub_tpm_version = 1;
-      *protocol_version = 1;
-      grub_dprintf ("tpm", "TPM handle Found, version: 1\n");
-      return 1;
-    }
-
   handles = grub_efi_locate_handle (GRUB_EFI_BY_PROTOCOL, &tpm2_guid, NULL,
 				    &num_handles);
   if (handles && num_handles > 0)
@@ -125,6 +113,18 @@ grub_tpm_handle_find (grub_efi_handle_t *tpm_handle,
       grub_tpm_version = 2;
       *protocol_version = 2;
       grub_dprintf ("tpm", "TPM handle Found, version: 2\n");
+      return 1;
+    }
+
+  handles = grub_efi_locate_handle (GRUB_EFI_BY_PROTOCOL, &tpm_guid, NULL,
+				    &num_handles);
+  if (handles && num_handles > 0)
+    {
+      grub_tpm_handle = handles[0];
+      *tpm_handle = handles[0];
+      grub_tpm_version = 1;
+      *protocol_version = 1;
+      grub_dprintf ("tpm", "TPM handle Found, version: 1\n");
       return 1;
     }
 
