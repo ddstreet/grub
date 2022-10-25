@@ -308,8 +308,8 @@ grub_err_t grub_tpm2_submit_command (unsigned char *command,
     return grub_error (GRUB_ERR_UNKNOWN_DEVICE, N_("no TPM2 device"));
 
   status = efi_call_5 (tpm->submit_command, tpm,
-                       (grub_uint32_t) command_size, (grub_addr_t) command,
-                       (grub_uint32_t) response_size, (grub_addr_t) response);
+                       (grub_uint32_t) command_size, command,
+                       (grub_uint32_t) response_size, response);
 
   return grub_efi_tpm_status (status);
 }
