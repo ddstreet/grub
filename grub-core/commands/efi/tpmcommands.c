@@ -21,6 +21,8 @@
 #include <grub/err.h>
 #include <grub/i18n.h>
 #include <grub/mm.h>
+#include <grub/misc.h>
+#include <grub/tpm.h>
 
 #include <tss2/tss2_tpm2_types.h>
 
@@ -37,7 +39,7 @@ struct tpm2_response_header {
 } GRUB_PACKED;
 
 #define SIZED_BUFFER(n) \
-  struct { UINT16 size; unsigned char[(n)] buffer; } GRUB_PACKED
+  struct { UINT16 size; unsigned char buffer[(n)]; } GRUB_PACKED
 
 /* SHA512 should currently have the largest digest size */
 #define MAX_DIGEST_SIZE TPM2_SHA512_DIGEST_SIZE
@@ -52,16 +54,19 @@ grub_err_t grub_tpm2_get_random (unsigned char *buffer, grub_size_t size)
     struct tpm2_response_header header;
     SIZED_BUFFER(MAX_DIGEST_SIZE) randomBytes;
   } GRUB_PACKED *response = NULL;
+  grub_uint32_t command_size = sizeof (*command);
+  grub_uint32_t response_size = sizeof (*response);
+  grub_uint32_t response_code;
   grub_err_t status = GRUB_ERR_NONE;
 
   if (!buffer)
     return grub_error (GRUB_ERR_BAD_ARGUMENT,
                        N_("missing buffer for random bytes"));
 
-  if (size > DIGEST_MAX_SIZE)
+  if (size > MAX_DIGEST_SIZE)
     return grub_error (GRUB_ERR_BAD_ARGUMENT,
                        N_("cannot get more than %d random bytes per call"),
-                       DIGEST_MAX_SIZE);
+                       MAX_DIGEST_SIZE);
 
   command = grub_zalloc (command_size);
   response = grub_zalloc (response_size);
@@ -76,17 +81,21 @@ grub_err_t grub_tpm2_get_random (unsigned char *buffer, grub_size_t size)
   command->header.commandCode = grub_cpu_to_be32 (TPM2_CC_GetRandom);
   command->bytesRequested = grub_cpu_to_be16 (size);
 
-  status = grub_tpm2_submit_command (command, sizeof (*command),
-                                     response, sizeof (*response));
-  if (status != GRUB_ERROR_NONE)
+  status = grub_tpm2_submit_command ((unsigned char *) command,
+                                     command_size,
+                                     (unsigned char *) response,
+                                     response_size);
+  if (status != GRUB_ERR_NONE)
     goto done;
 
+  response_code = grub_be_to_cpu32 (response->header.responseCode);
   if (response_code != TPM2_RC_SUCCESS) {
     status = grub_error (GRUB_ERR_IO, N_("TPM error %d"), response_code);
     goto done;
   }
 
-  memcpy (buffer, response->randomBytes.buffer, response->randomBytes.size);
+  grub_memcpy (buffer, response->randomBytes.buffer,
+               grub_be_to_cpu16 (response->randomBytes.size));
 
  done:
   if (command)
@@ -96,19 +105,19 @@ grub_err_t grub_tpm2_get_random (unsigned char *buffer, grub_size_t size)
   return status;
 }
 
+#define AUTH_SESSION_ALG TPM2_ALG_SHA256
+#define AUTH_SESSION_DIGEST_SIZE TPM2_SHA256_DIGEST_SIZE
+
 grub_err_t grub_tpm2_start_auth_session (grub_uint32_t *handle)
 {
-  /* We hardcode SHA256 here */
-  const TPMI_ALG_HASH hash_alg = TPM2_ALG_SHA256;
-  grub_size_t nonce_size = TPM2_SHA256_DIGEST_SIZE;
   struct {
     struct tpm2_command_header header;
     TPMI_DH_OBJECT tpmKey;
     TPMI_DH_ENTITY bind;
-    SIZED_BUFFER(nonce_size) nonceCaller;
+    SIZED_BUFFER(AUTH_SESSION_DIGEST_SIZE) nonceCaller;
     SIZED_BUFFER(0) encryptedSalt;
-    TPM_SE sessionType;
-    TPMT_SYM_DEF symmetric;
+    TPM2_SE sessionType;
+    grub_uint16_t symmetric;
     TPMI_ALG_HASH authHash;
   } GRUB_PACKED *command;
   struct {
@@ -119,10 +128,11 @@ grub_err_t grub_tpm2_start_auth_session (grub_uint32_t *handle)
   grub_uint32_t command_size = sizeof (*command);
   grub_uint32_t response_size = sizeof (*response);
   grub_uint32_t response_code;
+  grub_uint16_t nonce_size = sizeof (*command->nonceCaller.buffer);
   grub_err_t status = GRUB_ERR_NONE;
 
   if (!handle)
-    return grub_error (GRUB_BAD_ARGUMENT,
+    return grub_error (GRUB_ERR_BAD_ARGUMENT,
                        N_("must provide handle buffer"));
 
   command = grub_zalloc (command_size);
@@ -142,19 +152,20 @@ grub_err_t grub_tpm2_start_auth_session (grub_uint32_t *handle)
   command->encryptedSalt.size = grub_cpu_to_be16 (0);
   command->sessionType = TPM2_SE_HMAC;
   command->symmetric = grub_cpu_to_be16 (TPM2_ALG_NULL);
-  command->authHash = grub_cpu_to_be16 (hash_alg);
+  command->authHash = grub_cpu_to_be16 (AUTH_SESSION_ALG);
 
   status = grub_tpm2_get_random (command->nonceCaller.buffer, nonce_size);
   if (status != GRUB_ERR_NONE)
     goto done;
 
-  status = grub_tpm2_submit_command (command, command_size,
-                                     response, response_size);
-  if (status != GRUB_ERROR_NONE)
+  status = grub_tpm2_submit_command ((unsigned char *) command,
+                                     command_size,
+                                     (unsigned char *) response,
+                                     response_size);
+  if (status != GRUB_ERR_NONE)
     goto done;
 
-  response_code = grub_be_to_cpu32 (response->responseCode);
-
+  response_code = grub_be_to_cpu32 (response->header.responseCode);
   if (response_code != TPM2_RC_SUCCESS) {
     status = grub_error (GRUB_ERR_IO, N_("TPM error %d"), response_code);
     goto done;
@@ -170,9 +181,7 @@ grub_err_t grub_tpm2_start_auth_session (grub_uint32_t *handle)
   return status;
 }
 
-grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle,
-                                     unsigned char *sensitive,
-                                     grub_size_t sensitive_size)
+grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle)
 {
   struct {
     struct tpm2_command_header header;
@@ -205,16 +214,17 @@ grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle,
   } GRUB_PACKED *command;
   struct {
     struct tpm2_response_header header;
-    TPM_RC responseCode;
-    TPM_HANDLE objectHandle;
+    TPM2_HANDLE objectHandle;
     TPM2B_PUBLIC outPublic;
     TPM2B_CREATION_DATA creationData;
     TPM2B_DIGEST creationHash;
     TPMT_TK_CREATION creationTicket;
     TPM2B_NAME name;
   } GRUB_PACKED *response;
-  grub_size_t command_size = sizeof (*command);
-  grub_size_t response_size = sizeof (*response);
+  grub_uint32_t command_size = sizeof (*command);
+  grub_uint32_t response_size = sizeof (*response);
+  grub_uint32_t response_code;
+  grub_err_t status;
 
   command = grub_zalloc (command_size);
   response = grub_zalloc (response_size);
@@ -233,8 +243,16 @@ grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle,
   command->inSensitive.size = grub_cpu_to_be16 (sizeof (command->inSensitive) - 2);
   command->inPublic.size = grub_cpu_to_be16 (sizeof (command->inPublic) - 2);
 
-  status = grub_tpm2_submit_command ((unsigned char *) command, command_size,
-                                     (unsigned char *) response, response_size);
+  status = grub_tpm2_submit_command ((unsigned char *) command,
+                                     command_size,
+                                     (unsigned char *) response,
+                                     response_size);
+
+  response_code = grub_be_to_cpu32 (response->header.responseCode);
+  if (response_code != TPM2_RC_SUCCESS) {
+    status = grub_error (GRUB_ERR_IO, N_("TPM error %d"), response_code);
+    goto done;
+  }
 
  done:
   if (command)

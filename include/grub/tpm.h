@@ -46,7 +46,5 @@ grub_err_t grub_tpm2_get_random (unsigned char *buffer, grub_size_t size);
 
 grub_err_t grub_tpm2_start_auth_session (grub_uint32_t *handle);
 
-grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle,
-                                     unsigned char *sensitive,
-                                     grub_size_t sensitive_size);
+grub_err_t grub_tpm2_create_primary (grub_uint32_t session_handle);
 #endif
