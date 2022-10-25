@@ -667,7 +667,7 @@ typedef TPM2_HANDLE TPM2_HC;
 #define TPM2_PERMANENT_LAST       ((TPM2_HC) TPM2_RH_LAST)
 
 /* Definition of UINT32 TPMA_ALGORITHM Bits */
-typedef uint32_t TPMA_ALGORITHM;
+typedef UINT32 TPMA_ALGORITHM;
 
 #define TPMA_ALGORITHM_ASYMMETRIC     ((TPMA_ALGORITHM) 0x00000001) /* SET 1 an asymmetric algorithm with public and private portions. CLEAR 0 not an asymmetric algorithm */
 #define TPMA_ALGORITHM_SYMMETRIC      ((TPMA_ALGORITHM) 0x00000002) /* SET 1 a symmetric block cipher. CLEAR 0 not a symmetric block cipher */
@@ -680,7 +680,7 @@ typedef uint32_t TPMA_ALGORITHM;
 #define TPMA_ALGORITHM_RESERVED2_MASK ((TPMA_ALGORITHM) 0xFFFFF800)
 
 /* Definition of UINT32 TPMA_OBJECT Bits */
-typedef uint32_t TPMA_OBJECT;
+typedef UINT32 TPMA_OBJECT;
 
 #define TPMA_OBJECT_RESERVED1_MASK       ((TPMA_OBJECT) 0x00000001) /* shall be zero */
 #define TPMA_OBJECT_FIXEDTPM             ((TPMA_OBJECT) 0x00000002) /* SET 1 The hierarchy of the object as indicated by its Qualified Name may not change. CLEAR 0 The hierarchy of the object may change as a result of this object or an ancestor key being duplicated for use in another hierarchy. */
@@ -723,7 +723,7 @@ typedef UINT8 TPMA_LOCALITY;
 #define TPMA_LOCALITY_EXTENDED_SHIFT   (5)
 
 /* Definition of UINT32 TPMA_PERMANENT Bits <OUT> */
-typedef uint32_t TPMA_PERMANENT;
+typedef UINT32 TPMA_PERMANENT;
 
 #define TPMA_PERMANENT_OWNERAUTHSET        ((TPMA_PERMANENT) 0x00000001) /* SET 1 TPM2_HierarchyChangeAuth with ownerAuth has been executed since the last TPM2_Clear. CLEAR 0 ownerAuth has not been changed since TPM2_Clear. */
 #define TPMA_PERMANENT_ENDORSEMENTAUTHSET  ((TPMA_PERMANENT) 0x00000002) /* SET 1 TPM2_HierarchyChangeAuth with endorsementAuth has been executed since the last TPM2_Clear. CLEAR 0 endorsementAuth has not been changed since TPM2_Clear. */
@@ -735,7 +735,7 @@ typedef uint32_t TPMA_PERMANENT;
 #define TPMA_PERMANENT_RESERVED2_MASK      ((TPMA_PERMANENT) 0xFFFFF800)
 
 /* Definition of UINT32 TPMA_STARTUP_CLEAR Bits <OUT> */
-typedef uint32_t TPMA_STARTUP_CLEAR;
+typedef UINT32 TPMA_STARTUP_CLEAR;
 
 #define TPMA_STARTUP_CLEAR_PHENABLE       ((TPMA_STARTUP_CLEAR) 0x00000001) /* SET 1 The platform hierarchy is enabled and platformAuth or platformPolicy may be used for authorization. CLEAR 0 platformAuth and platformPolicy may not be used for authorizations and objects in the platform hierarchy including persistent objects cannot be used. NOTE See TPM2_HierarchyControl in TPM 2.0 Part 3 for details on changing this attribute. */
 #define TPMA_STARTUP_CLEAR_SHENABLE       ((TPMA_STARTUP_CLEAR) 0x00000002) /* SET 1 The Storage hierarchy is enabled and ownerAuth or ownerPolicy may be used for authorization. NV indices defined using owner authorization are accessible. CLEAR 0 ownerAuth and ownerPolicy may not be used for authorizations and objects in the Storage hierarchy persistent objects and NV indices defined using owner authorization cannot be used. NOTE See TPM2_HierarchyControl in TPM 2.0 Part 3 for details on changing this attribute. */
@@ -745,7 +745,7 @@ typedef uint32_t TPMA_STARTUP_CLEAR;
 #define TPMA_STARTUP_CLEAR_ORDERLY        ((TPMA_STARTUP_CLEAR) 0x80000000) /* SET 1 The TPM received a TPM2_Shutdown and a matching TPM2_Startup. CLEAR 0 TPM2_StartupTPM2_SU_CLEAR was not preceded by a TPM2_Shutdown of any type. NOTE A shutdown is orderly if the TPM receives a TPM2_Shutdown of any type followed by a TPM2_Startup of any type. However the TPM will return an error if TPM2_StartupTPM2_SU_STATE was not preceded by TPM2_State_SaveTPM2_SU_STATE. */
 
 /* Definition of UINT32 TPMA_MEMORY Bits <Out> */
-typedef uint32_t TPMA_MEMORY;
+typedef UINT32 TPMA_MEMORY;
 
 #define TPMA_MEMORY_SHAREDRAM            ((TPMA_MEMORY) 0x00000001) /* SET 1 indicates that the RAM memory used for authorization session contexts is shared with the memory used for transient objects. CLEAR 0 indicates that the memory used for authorization sessions is not shared with memory used for transient objects */
 #define TPMA_MEMORY_SHAREDNV             ((TPMA_MEMORY) 0x00000002) /* SET 1 indicates that the NV memory used for persistent objects is shared with the NV memory used for NV Index values. CLEAR 0 indicates that the persistent objects and NV Index values are allocated from separate sections of NV */
@@ -753,7 +753,7 @@ typedef uint32_t TPMA_MEMORY;
 #define TPMA_MEMORY_RESERVED1_MASK       ((TPMA_MEMORY) 0xFFFFFFF8) /* shall be zero */
 
 /* Definition of TPM2_CC TPMA_CC Bits <OUT> */
-typedef uint32_t TPMA_CC;
+typedef UINT32 TPMA_CC;
 
 #define TPMA_CC_COMMANDINDEX_MASK  ((TPMA_CC) 0x0000FFFF) /* indicates the command being selected */
 #define TPMA_CC_COMMANDINDEX_SHIFT (0)
@@ -769,13 +769,13 @@ typedef uint32_t TPMA_CC;
 #define TPMA_CC_RES_SHIFT          (30)
 
 /* Definition of UINT32 TPMA_MODES Bits <Out> */
-typedef uint32_t TPMA_MODES;
+typedef UINT32 TPMA_MODES;
 
 #define TPMA_MODES_FIPS_140_2     ((TPMA_MODES) 0x00000001) /* SET 1 indicates that the TPM is designed to comply with all of the FIPS 1402 requirements at Level 1 or higher. */
 #define TPMA_MODES_RESERVED1_MASK ((TPMA_MODES) 0xFFFFFFFE) /* shall be zero */
 
 /* Definition of UINT32 TPMA_X509_KEY_USAGE Bits */
-typedef uint32_t TPMA_X509_KEY_USAGE;
+typedef UINT32 TPMA_X509_KEY_USAGE;
 
 #define TPMA_X509_KEY_USAGE_RESERVED_MASK    ((TPMA_X509_KEY_USAGE) 0x007FFFFF) /* shall be zero */
 #define TPMA_X509_KEY_USAGE_DECIPHER_ONLY    ((TPMA_X509_KEY_USAGE) 0x00800000) /* As described in RFC5280. Requires objct attributes.Decrypt to be SET */
@@ -789,7 +789,7 @@ typedef uint32_t TPMA_X509_KEY_USAGE;
 #define TPMA_X509_KEY_USAGE_DIGITALSIGNATURE ((TPMA_X509_KEY_USAGE) 0x80000000) /* As described in RFC5280. Requires objct attributes.Sign to be SET in the SubjectKey */
 
 /* Definition of UINT32 TPMA_ACT Bits */
-typedef uint32_t TPMA_ACT;
+typedef UINT32 TPMA_ACT;
 
 #define TPMA_ACT_SIGNALED         ((TPMA_ACT) 0x00000001) /* SET 1 The ACT has signaled. CLEAR 0 The ACT has not signaled */
 #define TPMA_ACT_PRESERVESIGNALED ((TPMA_ACT) 0x00000002) /* SET 1 The ACT signaled bit is preserved over a power cycle. CLEAR 0 The ACT signaled bit is not preserved over a power cycle */
@@ -1844,7 +1844,7 @@ struct TPM2B_ID_OBJECT {
 };
 
 /* Definition of UINT32 TPM2_NV_INDEX Bits <> */
-typedef uint32_t TPM2_NV_INDEX;
+typedef UINT32 TPM2_NV_INDEX;
 
 #define TPM2_NV_INDEX_INDEX_MASK  ((TPM2_NV_INDEX) 0x00FFFFFF) /* The Index of the NV location */
 #define TPM2_NV_INDEX_INDEX_SHIFT (0)
@@ -1869,7 +1869,7 @@ struct TPMS_NV_PIN_COUNTER_PARAMETERS {
 };
 
 /* Definition of UINT32 TPMA_NV Bits */
-typedef uint32_t TPMA_NV;
+typedef UINT32 TPMA_NV;
 
 #define TPMA_NV_PPWRITE        ((TPMA_NV) 0x00000001) /* SET 1 The Index data can be written if Platform Authorization is provided. CLEAR 0 Writing of the Index data cannot be authorized with Platform Authorization. */
 #define TPMA_NV_OWNERWRITE     ((TPMA_NV) 0x00000002) /* SET 1 The Index data can be written if Owner Authorization is provided. CLEAR 0 Writing of the Index data cannot be authorized with Owner Authorization. */
